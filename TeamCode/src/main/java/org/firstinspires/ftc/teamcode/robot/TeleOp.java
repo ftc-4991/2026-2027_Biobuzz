@@ -19,6 +19,7 @@ public class TeleOp extends LinearOpMode {
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {
             robot.run();
+            robot.loopAll();
         }
 
         robot.reset();

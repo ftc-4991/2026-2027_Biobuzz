@@ -22,6 +22,8 @@ public class HardwareDevices {
             )
     );
 
+    public static final String pinpointName = "pinpoint";
+
     public static final MotorMeta flDrive = new MotorMeta("flDrive", Motor.GoBILDA.RPM_312);
     public static final MotorMeta frDrive = new MotorMeta("frDrive", Motor.GoBILDA.RPM_312);
     public static final MotorMeta blDrive = new MotorMeta("blDrive", Motor.GoBILDA.RPM_312);
