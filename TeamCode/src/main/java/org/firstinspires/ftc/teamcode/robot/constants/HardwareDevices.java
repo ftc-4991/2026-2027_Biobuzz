@@ -7,10 +7,13 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 import java.lang.Record;
 
 public class HardwareDevices {
     public static HardwareMap HARDWARE_MAP;
+    public static Telemetry telemetry;
     public static GamepadEx gamepadOne;
     public static GamepadEx gamepadTwo;
 

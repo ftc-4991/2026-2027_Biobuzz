@@ -6,7 +6,11 @@ import static org.firstinspires.ftc.teamcode.robot.constants.HardwareDevices.brD
 import static org.firstinspires.ftc.teamcode.robot.constants.HardwareDevices.flDrive;
 import static org.firstinspires.ftc.teamcode.robot.constants.HardwareDevices.frDrive;
 
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.pedropathing.controllers.PIDController;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import com.seattlesolvers.solverslib.command.Command;
 import com.seattlesolvers.solverslib.command.Subsystem;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
@@ -15,12 +19,15 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.robot.constants.HardwareDevices;
+import org.firstinspires.ftc.teamcode.util.logger.tunables.LoggedTunableNumber;
 
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+@Config
 public class Drive extends SubsystemBase {
+    public static PIDCoefficients TURNING_PID = new PIDCoefficients();
     private final MotorEx fr, fl, br, bl;
 
     private final IMU gyro;
@@ -88,7 +95,43 @@ public class Drive extends SubsystemBase {
 
                 return false;
             }
+
         };
+
+    }
+
+    public Command pidToTarget(DoubleSupplier targetHeading) {
+        final Drive drive = this;
+        return new Command() {
+            @Override
+            public Set<Subsystem> getRequirements() {
+                return Set.of(drive);
+            }
+
+            @Override
+            public void initialize() {
+
+            }
+
+            @Override
+            public void execute() {
+                PIDController pidController = new PIDController(TURNING_PID.p, TURNING_PID.i, TURNING_PID.d);
+                double error = targetHeading.getAsDouble() - getIMUYawDegs();
+                while (error > 180) error -= 360;
+                while (error < -180) error += 360;
+                HardwareDevices.telemetry.addData("Running PID Command with P", TURNING_PID.p);
+                HardwareDevices.telemetry.update();
+                drive(0, 0, pidController.calculate(targetHeading.getAsDouble(), error));
+            }
+
+            @Override
+            public boolean isFinished() {
+
+                return false;
+            }
+
+        };
+
     }
 
 }

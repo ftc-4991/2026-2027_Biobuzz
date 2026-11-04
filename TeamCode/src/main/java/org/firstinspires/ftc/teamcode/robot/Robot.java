@@ -47,18 +47,20 @@ public class Robot extends com.seattlesolvers.solverslib.command.Robot {
     }
 
     public void initTele() {
-        CommandScheduler.getInstance().setDefaultCommand(
-                drive,
-                drive.drive(
-                        () -> gamepadOne.getLeftX(),
-                        () -> gamepadOne.getLeftY(),
-                        () -> {
-                            return gamepadOne.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) - gamepadOne.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-                        },
-                        () -> !gamepadOne.getButton(GamepadKeys.Button.Y)
-                )
-        );
-        gamepadOne.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(new InstantCommand(drive::resetIMU));
+//        CommandScheduler.getInstance().setDefaultCommand(
+//                drive,
+//                drive.drive(
+//                        () -> gamepadOne.getLeftX(),
+//                        () -> gamepadOne.getLeftY(),
+//                        () -> {
+//                            return gamepadOne.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) - gamepadOne.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+//                        },
+//                        () -> !gamepadOne.getButton(GamepadKeys.Button.Y)
+//                )
+//        );
+//        gamepadOne.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(new InstantCommand(drive::resetIMU));
+//        gamepadOne.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileHeld(drive.pidToTarget(() -> 0.0));
+        CommandScheduler.getInstance().setDefaultCommand(drive, drive.pidToTarget(()-> 0.0));
     }
 
     public void initAuto() {

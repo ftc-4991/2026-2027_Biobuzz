@@ -11,6 +11,7 @@ public class TeleOp extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         HardwareDevices.HARDWARE_MAP = hardwareMap;
+        HardwareDevices.telemetry = telemetry;
         HardwareDevices.gamepadOne = new GamepadEx(gamepad1);
         HardwareDevices.gamepadTwo = new GamepadEx(gamepad2);
 
