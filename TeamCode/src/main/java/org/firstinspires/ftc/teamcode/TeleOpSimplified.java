@@ -29,13 +29,14 @@ public class TeleOpSimplified extends LinearOpMode {
     double targetRotation = 0;
     double minimumRotation;
     double maximumRotation;
+    DcMotor transferWheel;
 
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         //find the on the hardware map to define the variables
-       frontLeft = hardwareMap.get(DcMotor.class,"frontLeft");
+        frontLeft = hardwareMap.get(DcMotor.class,"frontLeft");
         frontRight = hardwareMap.get(DcMotor.class,"frontRight");
         backLeft = hardwareMap.get(DcMotor.class,"backLeft");
         backRight = hardwareMap.get(DcMotor.class,"backRight");
@@ -45,6 +46,7 @@ public class TeleOpSimplified extends LinearOpMode {
         flyWheelRoller = hardwareMap.get(DcMotor.class, "flyWheelRoller");
         flyWheelShield = hardwareMap.get(Servo.class, "hood");
         flyWheelRotationalMotor = hardwareMap.get(DcMotor.class, "turret horizontal rotation motor");
+        transferWheel=hardwareMap.get(DcMotor.class,"transferWheel");
 
         //Chosing how the motor runs
         flyWheelRotationalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -61,9 +63,10 @@ public class TeleOpSimplified extends LinearOpMode {
         rightRoller.setDirection(DcMotorSimple.Direction.FORWARD);
         flyWheelRoller.setDirection(DcMotorSimple.Direction.FORWARD);
         flyWheelRotationalMotor.setDirection(DcMotor.Direction.FORWARD);
+        transferWheel.setDirection(DcMotorSimple.Direction.FORWARD);
 
         //Setting the fly wheel shield initial position
-        flyWheelShieldPosition = 0.4;
+        flyWheelShieldPosition = 0.5;
 
         //Variables for intake
         boolean isIntaking = false;
@@ -84,10 +87,10 @@ public class TeleOpSimplified extends LinearOpMode {
             rotation = rotation * Math.abs(rotation);
 
             //Control Intake Motors
-            boolean intake = gamepad1.right_bumper;
+            boolean intake = gamepad2.right_bumper;
 
             //Make Reject variables
-            boolean reject = gamepad1.left_bumper;
+            boolean reject = gamepad2.left_bumper;
 
             //Making motors go faster
             double frontLeftPower = y + x + rotation;
@@ -104,7 +107,7 @@ public class TeleOpSimplified extends LinearOpMode {
             flyWheelRotationalMotor.setPower(flyWheelRotation);
 
             //Toggle for the intake
-            if(gamepad1.right_bumper && isIntaking){
+            if(gamepad2.right_bumper && isIntaking){
                 isIntaking = false;
                 topRoller.setPower(0);
                 leftRoller.setPower(0);
@@ -130,26 +133,28 @@ public class TeleOpSimplified extends LinearOpMode {
             }
 
             //Fly Wheel Speed
-            if (gamepad1.dpadDownWasPressed()){
+            if (gamepad2.dpadDownWasPressed()){
                 flyWheelRollerPower -= 0.05;
             }
-            if (gamepad1.dpadUpWasPressed()){
+            if (gamepad2.dpadUpWasPressed()){
                 flyWheelRollerPower += 0.05;
             }
-            if (gamepad1.yWasPressed()){
+            if (gamepad2.yWasPressed()){
                 flyWheelRoller.setPower(0);
             }
-            if (gamepad1.dpadLeftWasPressed()){
+            //Fly Wheel Shield
+            if (gamepad2.dpadLeftWasPressed()){
                 flyWheelShieldPosition -= 0.05;
                 flyWheelShield.setPosition(flyWheelShieldPosition);
 
             }
-            if (gamepad1.dpadRightWasPressed()) {
+            if (gamepad2.dpadRightWasPressed()) {
                 flyWheelShieldPosition += 0.05;
                 flyWheelShield.setPosition(flyWheelShieldPosition);
             }
-            if(gamepad1.xWasPressed()){
-                if (currentTurretRotation - 500 >= minimumRotation) {
+            //Turret Rotation
+            if(gamepad2.xWasPressed()){
+                if(currentTurretRotation - 500 >= minimumRotation) {
                     targetRotation = currentTurretRotation - 500;
                 } else {
                     targetRotation = minimumRotation;
@@ -159,8 +164,8 @@ public class TeleOpSimplified extends LinearOpMode {
                 sleep(500);
                 flyWheelRotationalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
-            if(gamepad1.bWasPressed()){
-                if (currentTurretRotation + 500 <= maximumRotation) {
+            if(gamepad2.bWasPressed()){
+                if(currentTurretRotation + 500 <= maximumRotation) {
                     targetRotation = currentTurretRotation + 500;
                 } else {
                     targetRotation = maximumRotation;
@@ -171,14 +176,16 @@ public class TeleOpSimplified extends LinearOpMode {
                 flyWheelRotationalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
             currentTurretRotation = (flyWheelRotationalMotor.getCurrentPosition());
-
-
             //telemetry
             telemetry.addData("Fly Wheel Speed", flyWheelRollerPower);
             telemetry.addData("Fly Wheel Hood Position", flyWheelShieldPosition);
             telemetry.update();
         }
-
+        if (gamepad2.left_trigger >0.90) {
+            transferWheel.setPower(0.5);
+        }
+        if (gamepad2.right_trigger>0.90) {
+            transferWheel.setPower(0);
+        }
     }
 }
-

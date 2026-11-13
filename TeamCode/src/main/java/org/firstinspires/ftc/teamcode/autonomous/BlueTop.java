@@ -31,11 +31,13 @@ public class BlueTop extends OpMode {
     CRServo leftIntake;
     CRServo rightIntake;
     DcMotor flywheel;
-    double flywheelPower = 0;
+    double flywheelPower = 0.6;
     Servo hood;
     double hoodPosition = 0;
     DcMotor turretMotor; //Rotation
+    DcMotor loadingMotor; // Loads into the turret
     Follower follower;
+    double loaderPower = 0.5;
 
     PoseFactory p;
     Pose startPose = p.of(83,133,270);
@@ -47,11 +49,13 @@ public class BlueTop extends OpMode {
         bl = hardwareMap.get(DcMotor.class,"backLeft");
         br = hardwareMap.get(DcMotor.class,"backRight");
         intake = hardwareMap.get(DcMotor.class, "topRoller");
+        loadingMotor = hardwareMap.get(DcMotor.class, "transferWheel");
         leftIntake = hardwareMap.get(CRServo.class, "leftRoller");
         rightIntake = hardwareMap.get(CRServo.class, "rightRoller");
         flywheel = hardwareMap.get(DcMotor.class, "flyWheelRoller");
         hood = hardwareMap.get(Servo.class, "hood");
         turretMotor = hardwareMap.get(DcMotor.class, "turret horizontal rotation motor");
+
 
         fl.setDirection(DcMotorSimple.Direction.FORWARD);
         fr.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -62,6 +66,7 @@ public class BlueTop extends OpMode {
         rightIntake.setDirection(DcMotorSimple.Direction.FORWARD);
         flywheel.setDirection(DcMotorSimple.Direction.FORWARD);
         turretMotor.setDirection(DcMotor.Direction.FORWARD);
+        loadingMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         Scheduler.reset();
         follower = Constants.createFollower(hardwareMap);
         follower.setPose(startPose);
@@ -77,18 +82,19 @@ public class BlueTop extends OpMode {
         return sequential(
 
                 Command.build().setStart(() -> {
-                    flywheelPower = 0.9; //TODO set power variable to what is necessary for the distance
+                    flywheelPower = 0.6; //TODO set power variable to what is necessary for the distance
                     hood.setPosition(hoodPosition); //TODO set the position variable to what is necessary for the distance
                     flywheel.setPower(flywheelPower);
 
                     //TODO figure out what is necessary for the launch of pollen in the loading mechanism
-
+                    loadingMotor.setPower(loaderPower);
 
                 }),
                 waitMs(12000), //TODO put in a reaonsable amount of time because Laedon is mean
                 Command.build().setStart(() -> {
                     flywheelPower = 0;
                     flywheel.setPower(flywheelPower);
+                    loadingMotor.setPower(0);
                 }),
 
                 follow(follower, park())
