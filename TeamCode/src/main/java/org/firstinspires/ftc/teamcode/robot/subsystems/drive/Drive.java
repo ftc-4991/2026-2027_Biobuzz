@@ -6,6 +6,7 @@ import static org.firstinspires.ftc.teamcode.robot.constants.HardwareDevices.brD
 import static org.firstinspires.ftc.teamcode.robot.constants.HardwareDevices.flDrive;
 import static org.firstinspires.ftc.teamcode.robot.constants.HardwareDevices.frDrive;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.pedropathing.controllers.PIDController;
@@ -15,9 +16,12 @@ import com.seattlesolvers.solverslib.command.Command;
 import com.seattlesolvers.solverslib.command.Subsystem;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.drivebase.MecanumDrive;
+import com.seattlesolvers.solverslib.geometry.Pose2d;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.robot.RobotState;
 import org.firstinspires.ftc.teamcode.robot.constants.HardwareDevices;
 import org.firstinspires.ftc.teamcode.util.logger.tunables.LoggedTunableNumber;
 
@@ -27,11 +31,13 @@ import java.util.function.DoubleSupplier;
 
 @Config
 public class Drive extends SubsystemBase {
-    public static PIDCoefficients TURNING_PID = new PIDCoefficients();
+    public static PIDCoefficients TURNING_PID = new PIDCoefficients(1.5, 0, 1.5);
     private final MotorEx fr, fl, br, bl;
 
     private final IMU gyro;
     private final MecanumDrive mecanumDrive;
+
+    private final FtcDashboard ftcDashboard;
     public Drive() {
         fr = new MotorEx(HARDWARE_MAP, frDrive.motorName, frDrive.goBILDA);
         fl = new MotorEx(HARDWARE_MAP, flDrive.motorName, flDrive.goBILDA);
@@ -42,6 +48,8 @@ public class Drive extends SubsystemBase {
 
         gyro = HARDWARE_MAP.get(IMU.class, HardwareDevices.gyroName);
         gyro.initialize(HardwareDevices.gyroParameters);
+
+        ftcDashboard = FtcDashboard.getInstance();
     }
     @Override
     public void periodic() {
@@ -116,11 +124,17 @@ public class Drive extends SubsystemBase {
             @Override
             public void execute() {
                 PIDController pidController = new PIDController(TURNING_PID.p, TURNING_PID.i, TURNING_PID.d);
-                double error = targetHeading.getAsDouble() - getIMUYawDegs();
-                while (error > 180) error -= 360;
-                while (error < -180) error += 360;
-                HardwareDevices.telemetry.addData("Running PID Command with P", TURNING_PID.p);
-                HardwareDevices.telemetry.update();
+                double error = targetHeading.getAsDouble() - getIMUYawRads();
+                while (error > Math.PI) error -= 2 * Math.PI;
+                while (error < -Math.PI) error += 2 * Math.PI;
+
+                TelemetryPacket packet = new TelemetryPacket();
+
+                packet.put("Drive/IMU heading (rads)", getIMUYawRads());
+                packet.put("Drive/Target heading (rads)", targetHeading.getAsDouble());
+
+                ftcDashboard.sendTelemetryPacket(packet);
+
                 drive(0, 0, pidController.calculate(targetHeading.getAsDouble(), error));
             }
 
