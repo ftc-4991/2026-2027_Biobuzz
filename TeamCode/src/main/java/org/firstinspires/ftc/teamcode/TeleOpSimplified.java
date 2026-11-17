@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
+//Sophia Schetz
+//11/12/2026
+//BioBuzz 2026-2027
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -7,35 +11,43 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-//Name the code and Define what type of code it is
-@TeleOp(name="TeleOpSimplified")
+@TeleOp(name="TelleOpSimplified")
 public class TeleOpSimplified extends LinearOpMode {
-    //Define Motors and their Variable Names
+    //Creating the Motors
     DcMotor frontLeft;
     DcMotor backLeft;
     DcMotor frontRight;
     DcMotor backRight;
-    DcMotor topRoller;
-    CRServo leftRoller;
-    CRServo rightRoller;
-    DcMotor flyWheelRoller;
+    DcMotor topRoller;  //Top wheels of the Intake
+    CRServo leftRoller; //Left wheel of the Intake
+    CRServo rightRoller; //Right wheel of the Intake
+    DcMotor flyWheelRoller; //Wheel for the Turret
+    Servo flyWheelShield;  //Hood of the Turret
+    DcMotor turretRotationalMotor;  //Motor to rotate the Turret
+    DcMotor transferWheel;  //Wheel to take the pollen from the intake to the turret
+
+    //Creating the Booleans
+    //double flyWheelRotation;
+    //double currentTurretRotation;
+    //double targetRotation = 0;
+    //double minimumRotation;
+   // double maximumRotation;
     double flyWheelRollerPower = 0;
-    Servo flyWheelShield;
     double flyWheelShieldPosition = 0;
-    DcMotor flyWheelRotationalMotor;
+    double frontLeftPower;
+    double frontRightPower;
+    double backLeftPower;
+    double backRightPower;
 
-    double flyWheelRotation;
-    double currentTurretRotation;
-    double targetRotation = 0;
-    double minimumRotation;
-    double maximumRotation;
-    DcMotor transferWheel;
+    //Control for the intake motors
+    //boolean intake;
+    //boolean reject;
 
-
+    //Loop for when the code is initiated
     @Override
     public void runOpMode() throws InterruptedException {
 
-        //find the on the hardware map to define the variables
+        //Creating the Motors and Servos in the hardware map
         frontLeft = hardwareMap.get(DcMotor.class,"frontLeft");
         frontRight = hardwareMap.get(DcMotor.class,"frontRight");
         backLeft = hardwareMap.get(DcMotor.class,"backLeft");
@@ -45,15 +57,16 @@ public class TeleOpSimplified extends LinearOpMode {
         rightRoller = hardwareMap.get(CRServo.class, "rightRoller");
         flyWheelRoller = hardwareMap.get(DcMotor.class, "flyWheelRoller");
         flyWheelShield = hardwareMap.get(Servo.class, "hood");
-        flyWheelRotationalMotor = hardwareMap.get(DcMotor.class, "turret horizontal rotation motor");
+        turretRotationalMotor = hardwareMap.get(DcMotor.class, "turret horizontal rotation motor");
         transferWheel=hardwareMap.get(DcMotor.class,"transferWheel");
 
-        //Chosing how the motor runs
-        flyWheelRotationalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //Choosing how the motor runs at default
+        turretRotationalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        flyWheelRotationalMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //Setting the brake variable
+        turretRotationalMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // Motor Directions
+        //Setting the motor's directions
         frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         frontRight.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -62,23 +75,25 @@ public class TeleOpSimplified extends LinearOpMode {
         leftRoller.setDirection(DcMotorSimple.Direction.REVERSE);
         rightRoller.setDirection(DcMotorSimple.Direction.FORWARD);
         flyWheelRoller.setDirection(DcMotorSimple.Direction.FORWARD);
-        flyWheelRotationalMotor.setDirection(DcMotor.Direction.FORWARD);
-        transferWheel.setDirection(DcMotorSimple.Direction.FORWARD);
+        turretRotationalMotor.setDirection(DcMotor.Direction.FORWARD);
+        transferWheel.setDirection(DcMotorSimple.Direction.REVERSE);
 
         //Setting the fly wheel shield initial position
         flyWheelShieldPosition = 0.5;
+        flyWheelShield.setPosition(0.5);
 
-        //Variables for intake
+        //Creating the variables for intake
         boolean isIntaking = false;
 
-        //Variable for Reject
+        //Creating the variable for reject
         boolean isRejecting = false;
 
-        //Loop for Driving Robot and Controlling motor.
+        //Initializing the Motors
         waitForStart();
+        //Loop for driving robot and controlling motor.
         while (opModeIsActive()) {
 
-            //Control the robots basic x and y axis movement and rotation
+            //Control the robots basic x and y axis movement and rotation(theta)
             double y = gamepad1.left_stick_y;
             y = y * Math.abs(y);
             double x = -gamepad1.left_stick_x;
@@ -86,74 +101,80 @@ public class TeleOpSimplified extends LinearOpMode {
             double rotation = -gamepad1.right_stick_x;
             rotation = rotation * Math.abs(rotation);
 
-            //Control Intake Motors
-            boolean intake = gamepad2.right_bumper;
+            //Creating more booleans for the basic field movement
+            frontLeftPower = y + x + rotation;
+            frontRightPower = y - x - rotation;
+            backLeftPower = y - x + rotation;
+            backRightPower = y + x - rotation;
 
-            //Make Reject variables
-            boolean reject = gamepad2.left_bumper;
-
-            //Making motors go faster
-            double frontLeftPower = y + x + rotation;
-            double frontRightPower = y - x - rotation;
-            double backLeftPower = y - x + rotation;
-            double backRightPower = y + x - rotation;
-
-            //Setting the Powers
+            //Setting the Powers to the Servos
             frontLeft.setPower(frontLeftPower);
             frontRight.setPower(frontRightPower);
             backLeft.setPower(backLeftPower);
             backRight.setPower(backRightPower);
             flyWheelRoller.setPower(flyWheelRollerPower);
-            flyWheelRotationalMotor.setPower(flyWheelRotation);
+            //flyWheelRotationalMotor.setPower(flyWheelRotation);
 
-            //Toggle for the intake
-            if(gamepad2.right_bumper && isIntaking){
-                isIntaking = false;
-                topRoller.setPower(0);
-                leftRoller.setPower(0);
-                rightRoller.setPower(0);
-            } else if (intake && !isIntaking){
-                isIntaking = true;
-                topRoller.setPower(1);
-                leftRoller.setPower(1);
-                rightRoller.setPower(1);
+            //Toggle Controls for the Intake
+            if(gamepad1.rightBumperWasPressed()) {
+                if (isIntaking) {
+                    isIntaking = false;
+                    topRoller.setPower(0);
+                    leftRoller.setPower(0);
+                    rightRoller.setPower(0);
+                } else if (!isIntaking) {
+                    isIntaking = true;
+                    topRoller.setPower(1);
+                    leftRoller.setPower(1);
+                    rightRoller.setPower(1);
+                }
             }
 
-            //Toggle for the reject
-            if(gamepad1.left_bumper && isRejecting){
+            //Toggle Controls for the Reject
+            if(gamepad1.leftBumperWasPressed()){
+                if(isRejecting){
                 isRejecting = false;
                 topRoller.setPower(0);
                 leftRoller.setPower(0);
                 rightRoller.setPower(0);
-            } else if (reject && !isRejecting){
+            } else if (!isRejecting){
                 isRejecting = true;
                 topRoller.setPower(-1);
                 leftRoller.setPower(-1);
                 rightRoller.setPower(-1);
             }
+                }
+            if (gamepad1.bWasPressed()){
+                topRoller.setPower(0);
+            }
 
-            //Fly Wheel Speed
+            //Setting the Fly Wheel adjustable speed
             if (gamepad2.dpadDownWasPressed()){
                 flyWheelRollerPower -= 0.05;
             }
             if (gamepad2.dpadUpWasPressed()){
                 flyWheelRollerPower += 0.05;
             }
+            //Turning the Fly Wheel off
             if (gamepad2.yWasPressed()){
-                flyWheelRoller.setPower(0);
+                flyWheelRollerPower=(0);
             }
-            //Fly Wheel Shield
+            //The Fly wheels basic speed
+            if (gamepad2.aWasPressed()){
+                flyWheelRollerPower=(0.6);
+            }
+            //Setting the Fly Wheel Hood Position
             if (gamepad2.dpadLeftWasPressed()){
                 flyWheelShieldPosition -= 0.05;
                 flyWheelShield.setPosition(flyWheelShieldPosition);
-
             }
             if (gamepad2.dpadRightWasPressed()) {
                 flyWheelShieldPosition += 0.05;
                 flyWheelShield.setPosition(flyWheelShieldPosition);
             }
-            //Turret Rotation
-            if(gamepad2.xWasPressed()){
+
+            //Setting the Turret Rotation
+            /* if(gamepad2.xWasPressed()){
                 if(currentTurretRotation - 500 >= minimumRotation) {
                     targetRotation = currentTurretRotation - 500;
                 } else {
@@ -164,28 +185,34 @@ public class TeleOpSimplified extends LinearOpMode {
                 sleep(500);
                 flyWheelRotationalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
-            if(gamepad2.bWasPressed()){
-                if(currentTurretRotation + 500 <= maximumRotation) {
+            if(gamepad2.bWasPressed()) {
+                if (currentTurretRotation + 500 <= maximumRotation) {
                     targetRotation = currentTurretRotation + 500;
                 } else {
                     targetRotation = maximumRotation;
                 }
-                flyWheelRotationalMotor.setTargetPosition((int)targetRotation);
+                flyWheelRotationalMotor.setTargetPosition((int) targetRotation);
                 flyWheelRotationalMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 sleep(500);
                 flyWheelRotationalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
-            currentTurretRotation = (flyWheelRotationalMotor.getCurrentPosition());
-            //telemetry
+            */
+                //Setting the Transfer Wheel actions
+                if(gamepad2.left_bumper){
+                    transferWheel.setPower(0.5);
+                }while(gamepad2.right_bumper){
+                    transferWheel.setPower(0);
+                }
+
+            //Defining the Turret's Variables
+            //currentTurretRotation = (flyWheelRotationalMotor.getCurrentPosition());
+
+            //Creating and Setting the Telemetry
             telemetry.addData("Fly Wheel Speed", flyWheelRollerPower);
             telemetry.addData("Fly Wheel Hood Position", flyWheelShieldPosition);
             telemetry.update();
         }
-        if (gamepad2.left_trigger >0.90) {
-            transferWheel.setPower(0.5);
-        }
-        if (gamepad2.right_trigger>0.90) {
-            transferWheel.setPower(0);
-        }
+
     }
 }
+
