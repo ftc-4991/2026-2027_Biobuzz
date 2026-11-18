@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.teleop;
 
 //Sophia Schetz
 //11/12/2026
@@ -122,7 +122,7 @@ public class TeleOpSimplified extends LinearOpMode {
                     topRoller.setPower(0);
                     leftRoller.setPower(0);
                     rightRoller.setPower(0);
-                } else if (!isIntaking) {
+                } else {
                     isIntaking = true;
                     topRoller.setPower(1);
                     leftRoller.setPower(1);
@@ -137,13 +137,13 @@ public class TeleOpSimplified extends LinearOpMode {
                 topRoller.setPower(0);
                 leftRoller.setPower(0);
                 rightRoller.setPower(0);
-            } else if (!isRejecting){
+            } else {
                 isRejecting = true;
                 topRoller.setPower(-1);
                 leftRoller.setPower(-1);
                 rightRoller.setPower(-1);
             }
-                }
+                } //end tag for if(isRejecting)
             if (gamepad1.bWasPressed()){
                 topRoller.setPower(0);
             }
