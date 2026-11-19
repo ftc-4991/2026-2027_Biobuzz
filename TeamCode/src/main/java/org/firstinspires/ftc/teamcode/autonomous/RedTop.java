@@ -78,8 +78,8 @@ public class RedTop extends OpMode {
         return sequential(
 
                 Command.build().setStart(() -> {
-                    flywheelPower = 0.6; //TODO set power variable to what is necessary for the distance
-                    hood.setPosition(hoodPosition); //TODO set the position variable to what is necessary for the distance
+                    flywheelPower = 0.6;
+                    //hood.setPosition(hoodPosition); //TODO set the position variable to what is necessary for the distance
                     flywheel.setPower(flywheelPower);
 
                     //TODO figure out what is necessary for the launch of pollen in the loading mechanism
