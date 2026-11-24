@@ -1,6 +1,34 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
+
+import com.pedropathing.follower.Follower;
+
+import org.firstinspires.ftc.teamcode.Point;
+
 public class TargetHeading {
+
+    public static final Point BLUE_TOP_HIVE = new Point(82.542, 82.542);
+    public static final Point BLUE_BOTTOM_HIVE = new Point(82.542, 58.958);
+    public static final Point RED_TOP_HIVE = new Point (58.958, 82.542);
+    public static final Point RED_BOTTOM_HIVE = new Point (58.958, 58.958);
+    private Point robotPoint; // may be redundant
+    private Point cornerPoint; //should use the x value of the robotPoint and the Y value of the hive point
+
+    private double currentHeading;
+    private double targetHeading;
+    private double hypotenuseDistance;
+    private double xDistance;
+    private double yDistance;
+
+    private double upperAngleLimit;
+    private double lowerAngleLimit;
+
+
+    private Follower follower;
+
+    private double robotX;
+    private double robotY;
+    private double robotHeading;
     /**
      *
      * separate the field into quadrants (used for trig) the origin of the quadrants should be

@@ -89,13 +89,13 @@ public class BlueTop extends OpMode {
                     //TODO figure out what is necessary for the launch of pollen in the loading mechanism
                     loadingMotor.setPower(loaderPower);
 
-                }),
-                waitMs(12000), //TODO put in a reaonsable amount of time because Laedon is mean
+                }), //Single-run instructions like setting power
+                waitMs(6000),
                 Command.build().setStart(() -> {
                     flywheelPower = 0;
                     flywheel.setPower(flywheelPower);
                     loadingMotor.setPower(0);
-                }),
+                }), //single-run instructions to stop certain motors
 
                 follow(follower, park())
         );
